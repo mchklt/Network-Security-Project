@@ -18,7 +18,7 @@ in virtualbox, configure the network settings:
 - **adapter 1**: NAT (represents the public network, takes an IP in the range of my local machine's IP).
 - **adapter 2**:  LAN (represents our internal network). 
 
-![Screenshot From 2025-01-07 12-20-40](https://github.com/user-attachments/assets/bda36148-296d-4811-89f9-5756b384f9fb)
+![Screenshot From 2025-01-07 12-20-40](https://github.com/user-attachments/assets/438834f1-58ad-4858-906a-f48cd5105fda)
 
 ## PfSense Panel
 
