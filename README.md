@@ -1,61 +1,57 @@
-# 1. installing the firewall with opnsense
+# 1. Installing the Firewall with pfSense
 
-## download:
-- download the iso file from [pfsense.iso](https://www.pfsense.org/download/) and decompress it.
+## Download:
+- Download the ISO file from [pfSense Download](https://www.pfsense.org/download/) and decompress it.
 
-## create a virtual machine:
-1. open virtualbox and create a new vm with the following requirements:
-   - **disk**: at least 15 gb.
-   - **ram**: at least 2 gb.
-2. add the opnsense iso to the vm.
+## Create a Virtual Machine:
+1. Open VirtualBox and create a new VM with the following requirements:
+   - **Disk**: At least 15 GB.
+   - **RAM**: At least 2 GB.
+2. Add the pfSense ISO to the VM.
 
-## installation:
-1. start the vm with the iso mounted.
-2. proceed with the installation like any other system.
+## Installation:
+1. Start the VM with the ISO mounted.
+2. Proceed with the installation like any other system.
 
-## network configuration:
-in virtualbox, configure the network settings:
-- **adapter 1**: NAT (represents the public network, takes an IP in the range of my local machine's IP).
-- **adapter 2**:  LAN (represents our internal network). 
+## Network Configuration:
+In VirtualBox, configure the network settings:
+- **Adapter 1**: **WAN**: Bridged Adapter (represents the public network, takes an IP in the range of my local machine's IP).
+- **Adapter 2**: **LAN**: Host-Only Adapter ("vmbox network" represents our internal network).
 
-![Screenshot From 2025-01-07 12-20-40](https://github.com/user-attachments/assets/438834f1-58ad-4858-906a-f48cd5105fda)
+### Enabling SSH in pfSense
 
-## PfSense Panel
+1. Navigate to **System → Advanced → Admin Access**.
+2. Locate the **Secure Shell** option and enable the **Secure Shell Server**.
 
-after accessing the opnsense panel via the ip assigned for nat (in this case, `192.168.11.200`), log in using the following credentials:  
-- **username**: `root`  
-- **password**: `opnsense`  
+The default credentials are:  
+- **Username:** admin  
+- **Password:** pfsense  
 
-upon logging in, the first page displays a panel with graphs representing usage statistics. to configure the firewall and set up rules, there are many functions available. the initial step involves managing services and filtering some from the network.
-### enabling ssh in opnsense
+Once SSH is enabled, test the connection to ensure it is functioning correctly.
 
-before proceeding with testing, ssh must be activated. by default, opnsense allows you to select which networks can access the secure shell (ssh) service. 
+# 3. Configuring the Firewall in pfSense
 
-in this case, the following interfaces were selected to meet the exercise requirements:
-- **LAN**
-- **WAN**
+After accessing the pfSense panel via the IP assigned for LAN (in this case, `192.168.56.103`), log in using the following credentials:  
+- **Username**: `admin`  
+- **Password**: `pfsense`  
 
-once ssh was enabled, it was tested successfully and confirmed to be working as expected.
+Upon logging in, the first page displays a panel with graphs representing usage statistics. To configure the firewall and set up rules, there are many functions available. The initial step involves managing services and filtering some from the network.
 
-![image](https://github.com/user-attachments/assets/bcacc3d6-c960-4c08-af11-3c5578be6fb7)
+### Blocking All Incoming Traffic  
+We will start by blocking all incoming (input) traffic related to all services except for commonly used ones:  
+- **HTTP (80)**  
+- **HTTPS (443)**  
+- **SSH (22)**  
 
-# 3. configuring the firewall in opnsense
+In this case, we will use a whitelist approach since the number of allowed protocols is fewer than those to be blocked. We will use the **Pass** action to whitelist ports `80`, `443`, and `22`.
 
-### blocking all incoming traffic  
-we will start by blocking all incoming (input) traffic related to all services except for commonly used ones:  
-- **http (80)**  
-- **https (443)**  
-- **ssh (22)**  
+### Steps to Configure Rules in pfSense
 
-in this case, we will use a whitelist approach since the number of allowed protocols is fewer than those to be blocked. we will use the **pass** action to whitelist ports `80`, `443`, and `22`.
-
-### Steps to Configure Rules in OPNsense  
-
-Navigate to:  
-**OPNsense → Firewall → Rules → WAN**
+Navigate to:
+**Firewall → Rules → WAN**
 
 #### Block All Traffic  
-1. Click **Add (+)** to create a new rule.  
+1. Click **Add** to create a new rule.  
 2. Configure the following:  
    - **Action**: `Block`.  
    - **Protocol**: `Any`.  
@@ -80,6 +76,7 @@ Navigate to **WAN** and create an **Allow** rule for each service:
 
 2. **SSH**:  
    - **Action**: `Pass`.  
+   
    - **Protocol**: `TCP`.  
    - **Source**: `Any`.  
    - **Destination**: `Any`.  
@@ -93,33 +90,40 @@ Navigate to **WAN** and create an **Allow** rule for each service:
 #### Allow Only Outgoing Connections on Specific Ports (80, 443, 53)  
 
 Navigate to:  
-**OPNsense → Firewall → Rules → WAN**
+**Firewall → Rules → LAN**
 
 1. **Block All Outgoing Traffic**:  
-   - Click **Add (+)** to create a new rule.  
+   - Click **Add** to create a new rule.  
    - Configure the following:  
      - **Action**: `Block`.  
+      
      - **Protocol**: `Any`.  
      - **Source**: `Any`.  
      - **Destination**: `Any`.  
      - **Log**: Enable.  
 
-2. **Allow HTTP/HTTPS (Port 80, 443)**:  
-   - Click **Add (+)** to create a new rule.  
+2. **Allow HTTP (Port 80)**:  
+   - Click **Add** to create a new rule.  
    - Configure the following:  
      - **Action**: `Pass`.  
+      
      - **Protocol**: `TCP`.  
-     - **Source**: `Any`. 
-     - **Source Port Range**:  
-       - **From**: `80`  
-       - **To**: `443`.  
+     - **Source**: `Any`.  
      - **Destination**: `Any`.  
+     - **Destination Port Range**:  
+       - **From**: `80`  
+       - **To**: `80`.  
      - **Log**: Enable.  
+
+3. **Allow HTTPS (Port 443)**:  
+   - Configure similarly to **HTTP**, but set the port range to:  
+     - **From**: `443`  
+     - **To**: `443`.  
 
 4. **Allow DNS (Port 53)**:  
    - Configure similarly to **HTTP**, but set:  
-     - **Protocol**: `TCP/UDP`.  
-     - **Source Port Range**:  
+     - **Protocol**: `UDP`.  
+     - **Destination Port Range**:  
        - **From**: `53`  
        - **To**: `53`.  
 
@@ -131,6 +135,7 @@ Navigate to **WAN** and create a **Block** rule for each protocol:
 
 1. **Telnet (Port 23)**:  
    - **Action**: `Block`.  
+   
    - **Protocol**: `TCP`.  
    - **Source**: `Any`.  
    - **Destination**: `Any`.  
@@ -141,6 +146,7 @@ Navigate to **WAN** and create a **Block** rule for each protocol:
 
 2. **FTP (Ports 20, 21)**:  
    - **Action**: `Block`.  
+   
    - **Protocol**: `TCP`.  
    - **Source**: `Any`.  
    - **Destination**: `Any`.  
@@ -149,18 +155,20 @@ Navigate to **WAN** and create a **Block** rule for each protocol:
      - **To**: `21`.  
    - **Log**: Enable.  
 
-3. **SMB (Ports 135-139, 445)**:  
+3. **SMB (Ports 137-139, 445)**:  
    - **Action**: `Block`.  
+   
    - **Protocol**: `TCP`.  
    - **Source**: `Any`.  
    - **Destination**: `Any`.  
    - **Destination Port Range**:  
-     - **From**: `135`  
+     - **From**: `137`  
      - **To**: `139`.  
    - **Log**: Enable.  
 
    - Create another rule for port `445`:  
      - **Action**: `Block`.  
+     
      - **Protocol**: `TCP`.  
      - **Source**: `Any`.  
      - **Destination**: `Any`.  
@@ -175,6 +183,7 @@ Navigate to **WAN** and create a **Block** rule for each protocol:
 
 1. **Torrent (Port Range 6881-6889)**:  
    - **Action**: `Block`.  
+   
    - **Protocol**: `TCP/UDP`.  
    - **Source**: `Any`.  
    - **Destination**: `Any`.  
@@ -183,87 +192,145 @@ Navigate to **WAN** and create a **Block** rule for each protocol:
      - **To**: `6889`.  
    - **Log**: Enable.  
 
-
 ### Enable and Configure Connection Logs  
 
-	We enabled logs earlier by selecting Log in each rule.
-
-![image](https://github.com/user-attachments/assets/a8a7bc0b-85ca-43e1-ae3f-ffa5d91e5e73)
+We enabled logs earlier by selecting Log in each rule.
 
 # Setting Up an IDS/IPS Solution
 
-To enhance security, an IDS (Intrusion Detection System) and IPS (Intrusion Prevention System) are deployed. These tools detect and prevent attacks in real-time. In pfSense, we use **Snort** for IDS functionality.
+To level up security, I deploy an IDS (Intrusion Detection System) and IPS (Intrusion Prevention System). These tools help detect and prevent attacks in real-time.
 
-## Installing Snort on pfSense
+in pfsense we have to download snort as ids
 
-1. Navigate to **System → Package Manager → Available Packages**.
-2. Search for **Snort**.
-3. Click **Install** to download and install Snort.
+1. Navigate to System → Package Manager → Available Packages
+2. search snort.
+3. then click install 
 
-## Snort Configuration in pfSense
+snort configuration in pfsense  
+go to services → SNORT
 
-1. Go to **Services → SNORT** to access the Snort configuration panel.
-2. In this panel, you can manage all Snort settings and rules.
+then we are in snort pannel it contains alot of function and we can manage everything on it 
 
-## Configuring Interfaces
+ configure interfaces
+in our case we are focusing on preventing or detecting all what it comes through WAN 
+first of all we have to create interfaces in **Snort Interfaces** 
+then click Add 
 
-For detecting or preventing threats through the **WAN**, we need to configure the interfaces.
+	tick Enable 
+	chose interface in our case it's **WAN**	
+	then click save 
+	
+### Detecting Port Scanning 
+we have to detect any threat by attackers as first phae of an attacker it's reconnaissance which incluse portscanning we have to start by detecting portscanning through the most famous tool which is NMAP 
+to download rules we have togo to WAN Categories then select the needed ruleset in our case we need to detect scanning phase of the atacker we gonna tick **emerging-scan.rules** then Save 
+then go to WAN Rules → then select **emerging-scan.rules* via Category Selection then Enable all (to enable all rules of that ruleset) → Apply ( to apply that rules) 
 
-1. Go to **Snort Interfaces** and click **Add**.
-2. Tick **Enable** and select **WAN** as the interface.
-3. Click **Save** to apply the changes.
 
-## Detecting Port Scanning
+also in snort by default give us some predefined rules which have just to tick to activate it after click on the edit button on the interface then **WAN Preprocs**  → **Portscan Detection** → tick the **use Portscan Detection...** 
 
-As part of the reconnaissance phase, attackers often perform **port scanning**. We’ll start by detecting port scanning using **Nmap**.
 
-1. Go to **WAN → Categories** and select the necessary ruleset.
-2. For detecting port scanning, enable the **emerging-scan.rules** ruleset and click **Save**.
-3. Then, navigate to **WAN Rules** and select **emerging-scan.rules** via Category Selection.
-4. Enable all rules in that set and click **Apply** to activate them.
+now if an attacker used nmap or tried to scan ports of server in our network we can detect it 
 
-Additionally, Snort provides predefined rules that you can activate. To enable **port scan detection**:
 
-1. Click **Edit** on the WAN interface in Snort.
-2. Go to **WAN Preprocs → Portscan Detection**.
-3. Tick **Use Portscan Detection** and save.
 
-This configuration will allow Snort to detect **Nmap** or any other port scanning attempts targeting your server.
 
-## Detecting SSH Brute Force Attacks
+### Detecting SSH BruteForce 
 
-To protect your SSH server from brute-force attacks, you can create a custom rule to detect such attempts.
+also i created a rule that detect ssh bruteforce to prevent like that attacks 
 
-1. Go to **WAN Rules → Category Selection** and select **custom.rules**.
-2. Add the following custom rule to detect SSH brute-force attempts:
 
-```plaintext
+we can add our rule on WAN RULES → Category Selection → chose costum.rules → and add 
+```
 alert tcp any any -> $HOME_NET 22 (msg:"SSH brute force detected"; flags: S; threshold: type both, track by_src, count 10, seconds 60; sid:10000006; rev:1;)
 ```
+then if attacker tried to bruteforce a ssh server in our network we gonna detect it 
 
-3. Save the rule, and Snort will now detect SSH brute-force attacks targeting your network.
+### Configuring OpenVPN on pfSense
 
-## Final Test
+By default, pfSense comes with various VPN services. In this guide, we’ll be setting up OpenVPN as a remote access server.
 
-After applying these configurations, Snort will monitor for port scanning activities and SSH brute-force attacks. You can test these by running a **Nmap port scan** or attempting an SSH brute force attack on the configured network to verify detection.
+1. **Set Up the OpenVPN Server:**
+   - Go to `VPN` → `OpenVPN` → `Wizards`.
+   - Select **Type of Server**: `Local User Access` and click **Next**.
+   - Fill in the form:
+     - **Descriptive Name**: `network_OpenVPN`
+     - The country info is optional.
+     - Click **Add New CA** and add the server certificate as you did previously. Then click **Add New CA** again.
+   - Now fill in the form:
+     - **Description**: `Network_OpenVPN`
+     - **Endpoint Configuration**:
+       - **Protocol**: Select `TCP IPv4 and IPv6 on all interfaces (multihome)`.
+       - **Interface**: Choose `LAN` for VPN.
+     - In **Tunnel Settings**, configure:
+       - **IPv4 Tunnel Network**: `192.168.100.0/24` (IP range for the VPN user).
+       - **Local Network**: `192.168.56.0/24` (your local network).
+   - Click **Next**, and tick both **Firewall Rule** and **OpenVPN Rule**. Then click **Next** and **Finish**.
 
-## Port-Scanning Test
+   OpenVPN should now be running.
 
-![Screenshot From 2025-01-06 18-38-37](https://github.com/user-attachments/assets/fab2f375-d8f4-46d5-8b34-dfa93d4b1880)
+2. **Create a User for VPN Access:**
+   - Go to `System` → `User Manager` → `Users`.
+   - Click **Add** and fill in the user details (username, full name, password).
+   - Enable **Certificate** to create a certificate for the user. 
+   - Fill in the form with:
+     - **Descriptive Name**: Choose a name for the certificate.
+     - **Certificate Authority**: Select the VPN name you created earlier (`network_OpenVPN`).
+   - Keep other values as defaults and click **Save**.
 
-by running nmap on server from our network using `nmap 192.168.11.200`
+3. **Export the VPN Configuration:**
+   - The VPN installer is not included by default in pfSense. To install it:
+     - Go to `System` → `Package Manager` → `Available Packages`.
+     - Install the package `openvpn-client-export`.
+   - Once installed, go back to `VPN` → `OpenVPN` → `Client Export`.
+   - Select the remote access server you created earlier.
+   - Scroll to the bottom of the page and export the VPN configuration for a Linux user:
+     - Choose **Bundled Configurations** → **Inline Configurations** → **Most VPN**.
+   - Download the `.ovpn` file.
 
-Then we got alerts in snort dashboard 
+4. **Connect Using OpenVPN:**
+   - To connect using the `.ovpn` file, use the OpenVPN command line:
+     ```bash
+     openvpn pfSense-UDP4-1194-vpnuser-config.ovpn
+     ```
+   - Normally, this will connect and assign an IP from the **Tunnel Network** you configured earlier. You should be able to ping devices on the network.
 
-![Screenshot From 2025-01-06 14-22-22](https://github.com/user-attachments/assets/a74e1665-5c7d-434e-887c-adefdc8d22ba)
+**Note**: In my case, this setup didn’t work, so I had to switch to another VPN service, Twingate.
 
-## SSh-BruteForce Test
-![image](https://github.com/user-attachments/assets/54190b18-299e-45ed-bbc5-0943eda45969)
+### Let's Configure Twingate
 
-by running hydra we gonna bruterforce password for root user of ssh server in our network
-```bash
-hydra -l root -P /usr/share/seclists/Passwords/500-worst-passwords.txt ssh://192.168.11.200
-```
-Then we got alerts in snort dashboard 
+For this setup, we need a machine in the same network as the one we want to access remotely. In my case, I have an Ubuntu machine in VirtualBox on a `vboxnet` network, which contains the same pfSense machine.
 
-![Screenshot From 2025-01-06 18-41-32](https://github.com/user-attachments/assets/b47bf092-96a5-4f57-a0b1-5d47967fbce9)
+1. **Create an Account:**
+   - On the machine, browse to [Twingate Signup](https://auth.twingate.com/signup-v2).
+   - Sign up for an account. During signup, you’ll be asked to provide a network name. Choose a name, like "networkproject" (this name is crucial for anyone wanting to connect to your network via VPN).
+   - After signing up, log in to your account.
+
+   During account creation, you'll be prompted for some information and given multiple choices to connect your machine with Twingate. I chose the bash script command, which was simple and effective. I copied the script and pasted it into the terminal to complete the process.
+
+2. **Configure the Network:**
+   - In the Twingate panel, go to **Resources** and click **+Resource** to add the network you want to be accessible via the VPN.
+   - Set the following:
+     - **Label**: `name_of_the_resource`
+     - **Address**: `192.168.56.0/24`
+   - Click **Create Resource**.
+
+3. **Configure the Twingate Server:**
+   - On the Ubuntu machine, after installing Twingate (as per the previous step), run the command:
+     ```bash
+     twingate setup
+     ```
+   - The setup will ask for information, including the network name you created earlier (`networkproject`). You’ll also be asked to approve some agreements.
+
+4. **Test Connectivity on the Client:**
+   - To connect, download the Twingate VPN app on the client machine. I tested connectivity via my iPhone:
+     - Go to the App Store and download the Twingate mobile app.
+     - After opening the app, enter the network name (`networkproject`) and grant the app VPN permissions.
+     - The phone will connect to the pfSense network, even while using mobile data (not the local network). The VPN works fine.
+
+   **Note**: The first attempt didn’t work. After troubleshooting, I realized there was no routing on the Twingate server. To fix this, I added routing with the following command:
+   ```bash
+   ip route add 192.168.56.103 via 192.168.56.101 dev enp0s8
+   ```
+• 192.168.56.103 → pfSense IP
+• 192.168.56.101 → My machine IP as the gateway
+• enp0s8 → Network interface
