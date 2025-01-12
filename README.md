@@ -305,7 +305,7 @@ For this setup, we need a machine in the same network as the one we want to acce
    - Sign up for an account. During signup, you’ll be asked to provide a network name. Choose a name, like "networkproject" (this name is crucial for anyone wanting to connect to your network via VPN).
    - After signing up, log in to your account.
 
-   During account creation, you'll be prompted for some information and given multiple choices to connect your machine with Twingate. I chose the bash script command, which was simple and effective. I copied the script and pasted it into the terminal to complete the process.
+   During account creation, youll be prompted for some information and given multiple choices to connect your machine with Twingate. I chose the bash script command, which was simple and effective. I copied the script and pasted it into the terminal to complete the process.
 
 2. **Configure the Network:**
    - In the Twingate panel, go to **Resources** and click **+Resource** to add the network you want to be accessible via the VPN.
