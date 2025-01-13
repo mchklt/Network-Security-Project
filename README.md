@@ -90,19 +90,9 @@ Navigate to **WAN** and create an **Allow** rule for each service:
 #### Allow Only Outgoing Connections on Specific Ports (80, 443, 53)  
 
 Navigate to:  
-**Firewall → Rules → LAN**
+**Firewall → Rules → WAN**
 
-1. **Block All Outgoing Traffic**:  
-   - Click **Add** to create a new rule.  
-   - Configure the following:  
-     - **Action**: `Block`.  
-      
-     - **Protocol**: `Any`.  
-     - **Source**: `Any`.  
-     - **Destination**: `Any`.  
-     - **Log**: Enable.  
-
-2. **Allow HTTP (Port 80)**:  
+1. **Allow HTTP (Port 80)**:  
    - Click **Add** to create a new rule.  
    - Configure the following:  
      - **Action**: `Pass`.  
@@ -115,12 +105,12 @@ Navigate to:
        - **To**: `80`.  
      - **Log**: Enable.  
 
-3. **Allow HTTPS (Port 443)**:  
+2. **Allow HTTPS (Port 443)**:  
    - Configure similarly to **HTTP**, but set the port range to:  
      - **From**: `443`  
      - **To**: `443`.  
 
-4. **Allow DNS (Port 53)**:  
+3. **Allow DNS (Port 53)**:  
    - Configure similarly to **HTTP**, but set:  
      - **Protocol**: `UDP`.  
      - **Destination Port Range**:  
