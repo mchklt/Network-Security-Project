@@ -321,6 +321,9 @@ For this setup, we need a machine in the same network as the one we want to acce
    ```bash
    ip route add 192.168.56.103 via 192.168.56.101 dev enp0s8
    ```
+   
 • 192.168.56.103 → pfSense IP
+
 • 192.168.56.101 → My machine IP as the gateway
+
 • enp0s8 → Network interface
