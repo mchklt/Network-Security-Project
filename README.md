@@ -29,6 +29,8 @@ The default credentials are:
 
 Once SSH is enabled, test the connection to ensure it is functioning correctly.
 
+![image](https://github.com/user-attachments/assets/62eea733-d925-436e-aa6c-33585d03de8f)
+
 # 3. Configuring the Firewall in pfSense
 
 After accessing the pfSense panel via the IP assigned for LAN (in this case, `192.168.56.103`), log in using the following credentials:  
@@ -59,8 +61,9 @@ Navigate to:
    - **Destination**: `Any`.  
    - **Log**: Enable.
 
----
+![image](https://github.com/user-attachments/assets/61cca87f-aa7f-4f41-9cff-499b7a5e7bc8)
 
+---
 #### Allow HTTP, HTTPS, and SSH  
 Navigate to **WAN** and create an **Allow** rule for each service:  
 
@@ -73,6 +76,7 @@ Navigate to **WAN** and create an **Allow** rule for each service:
      - **From**: `HTTP`  
      - **To**: `HTTPS`.  
    - **Log**: Enable.  
+![image](https://github.com/user-attachments/assets/f37dda1b-69c1-41d0-a67b-64132d1cbb2e)
 
 2. **SSH**:  
    - **Action**: `Pass`.  
@@ -85,8 +89,9 @@ Navigate to **WAN** and create an **Allow** rule for each service:
      - **To**: `SSH`.  
    - **Log**: Enable.  
 
----
+![image](https://github.com/user-attachments/assets/2a3ef5c1-0752-4e16-8870-56443ec15e0b)
 
+---
 #### Allow Only Outgoing Connections on Specific Ports (80, 443, 53)  
 
 Navigate to:  
@@ -110,12 +115,16 @@ Navigate to:
      - **From**: `443`  
      - **To**: `443`.  
 
+![image](https://github.com/user-attachments/assets/3694282e-6b88-483e-be47-fa64ffaaae1b)
+
 3. **Allow DNS (Port 53)**:  
    - Configure similarly to **HTTP**, but set:  
      - **Protocol**: `UDP`.  
      - **Destination Port Range**:  
        - **From**: `53`  
-       - **To**: `53`.  
+       - **To**: `53`.
+
+![image](https://github.com/user-attachments/assets/8d57f787-f611-4366-b0d3-282fc75b9702)
 
 ---
 
@@ -134,7 +143,9 @@ Navigate to **WAN** and create a **Block** rule for each protocol:
      - **To**: `23`.  
    - **Log**: Enable.  
 
-2. **FTP (Ports 20, 21)**:  
+![image](https://github.com/user-attachments/assets/745b39c4-d8cd-428e-a77b-a622d16ef678)
+
+2. **FTP (Port 21)**:  
    - **Action**: `Block`.  
    
    - **Protocol**: `TCP`.  
@@ -144,6 +155,8 @@ Navigate to **WAN** and create a **Block** rule for each protocol:
      - **From**: `20`  
      - **To**: `21`.  
    - **Log**: Enable.  
+
+![image](https://github.com/user-attachments/assets/35f78dd5-1291-434a-976a-e83661572231)
 
 3. **SMB (Ports 137-139, 445)**:  
    - **Action**: `Block`.  
@@ -167,6 +180,8 @@ Navigate to **WAN** and create a **Block** rule for each protocol:
        - **To**: `445`.  
      - **Log**: Enable.  
 
+![image](https://github.com/user-attachments/assets/f7ea6b9a-5beb-46b8-a253-fffe9d8833b0)
+
 ---
 
 #### Block Torrent Downloads  
@@ -182,9 +197,13 @@ Navigate to **WAN** and create a **Block** rule for each protocol:
      - **To**: `6889`.  
    - **Log**: Enable.  
 
+![Screenshot From 2025-01-15 23-12-51](https://github.com/user-attachments/assets/43132d0c-3960-418d-a448-2d3f00c39d3c)
+
 ### Enable and Configure Connection Logs  
 
 We enabled logs earlier by selecting Log in each rule.
+
+![image](https://github.com/user-attachments/assets/a5ce9ec2-8e01-4377-a26d-feabaedde871)
 
 # Setting Up an IDS/IPS Solution
 
@@ -195,6 +214,8 @@ in pfsense we have to download snort as ids
 1. Navigate to System → Package Manager → Available Packages
 2. search snort.
 3. then click install 
+
+![image](https://github.com/user-attachments/assets/f6e58b41-2c63-468f-bccd-ebdae2c599c7)
 
 snort configuration in pfsense  
 go to services → SNORT
@@ -209,31 +230,43 @@ then click Add
 	tick Enable 
 	chose interface in our case it's **WAN**	
 	then click save 
-	
+
+![image](https://github.com/user-attachments/assets/6b54be2e-4c04-4af0-b7fc-593378f902a3)
+
 ### Detecting Port Scanning 
 we have to detect any threat by attackers as first phae of an attacker it's reconnaissance which incluse portscanning we have to start by detecting portscanning through the most famous tool which is NMAP 
 to download rules we have togo to WAN Categories then select the needed ruleset in our case we need to detect scanning phase of the atacker we gonna tick **emerging-scan.rules** then Save 
 then go to WAN Rules → then select **emerging-scan.rules* via Category Selection then Enable all (to enable all rules of that ruleset) → Apply ( to apply that rules) 
 
+![image](https://github.com/user-attachments/assets/7aeac72a-aa82-4d4e-8d83-6f731962e206)
 
 also in snort by default give us some predefined rules which have just to tick to activate it after click on the edit button on the interface then **WAN Preprocs**  → **Portscan Detection** → tick the **use Portscan Detection...** 
 
+![image](https://github.com/user-attachments/assets/fb14fb09-9a6e-4407-8cc3-aa292c71f971)
 
-now if an attacker used nmap or tried to scan ports of server in our network we can detect it 
+now if an attacker used nmap or tried to scan ports of server in our network,
 
+![Screenshot From 2025-01-06 18-38-37](https://github.com/user-attachments/assets/73bd320f-48ff-4396-818f-e52530084f54)
 
+we can detect it 
 
+![Screenshot From 2025-01-06 14-22-22](https://github.com/user-attachments/assets/50800378-24c8-42e5-9f1f-2cab23f7b6cd)
 
 ### Detecting SSH BruteForce 
 
 also i created a rule that detect ssh bruteforce to prevent like that attacks 
 
-
 we can add our rule on WAN RULES → Category Selection → chose costum.rules → and add 
 ```
 alert tcp any any -> $HOME_NET 22 (msg:"SSH brute force detected"; flags: S; threshold: type both, track by_src, count 10, seconds 60; sid:10000006; rev:1;)
 ```
-then if attacker tried to bruteforce a ssh server in our network we gonna detect it 
+then if attacker tried to bruteforce a ssh server in our network,
+
+![Screenshot From 2025-01-06 18-32-31](https://github.com/user-attachments/assets/7ab6b7a4-a059-4692-93fa-c804e10a654f)
+
+we gonna detect it 
+
+![Screenshot From 2025-01-06 18-41-32](https://github.com/user-attachments/assets/44e3a9bf-21a6-433f-81a7-baf5f1434d2d)
 
 ### Configuring OpenVPN on pfSense
 
